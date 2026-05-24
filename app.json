@@ -1,0 +1,52 @@
+{
+  "expo": {
+    "name": "Pour",
+    "slug": "pour-sommelier",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/icon.png",
+    "userInterfaceStyle": "dark",
+    "scheme": "pour",
+    "ios": {
+      "supportsTablet": false,
+      "bundleIdentifier": "com.pour.sommelier"
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
+        "backgroundColor": "#0A0E27"
+      },
+      "package": "com.pour.sommelier",
+      "permissions": [
+        "android.permission.CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE"
+      ]
+    },
+    "plugins": [
+      "expo-router",
+      "expo-font",
+      [
+        "expo-camera",
+        {
+          "cameraPermission": "Pour needs camera access to identify dishes and bottles for pairing."
+        }
+      ],
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "Pour needs photo access to analyze your food and drink photos."
+        }
+      ],
+      [
+        "expo-media-library",
+        {
+          "photosPermission": "Pour saves your pairing cards to your gallery."
+        }
+      ]
+    ],
+    "experiments": {
+      "typedRoutes": true
+    }
+  }
+}
