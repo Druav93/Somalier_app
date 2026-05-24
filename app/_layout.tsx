@@ -29,6 +29,7 @@ function RootNavigator() {
         <Stack.Screen name="index" />
         <Stack.Screen name="onboarding" />
         <Stack.Screen name="(tabs)" />
+        <Stack.Screen name="pairing" options={{ animation: 'slide_from_bottom' }} />
       </Stack>
     </>
   );

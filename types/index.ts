@@ -50,6 +50,12 @@ export interface BarItem {
   created_at: string;
 }
 
+export interface PairingAIResult {
+  dish_description: string;
+  pairings: PairingOption[];
+  why_it_works: string;
+}
+
 export interface OnboardingProfile {
   sweetness: number;
   body: number;
