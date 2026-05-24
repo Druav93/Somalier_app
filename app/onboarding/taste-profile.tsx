@@ -1,12 +1,10 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect } from 'react';
 import {
   View,
   Text,
   StyleSheet,
   SafeAreaView,
   ScrollView,
-  StatusBar,
-  Platform,
 } from 'react-native';
 import { router } from 'expo-router';
 import Animated, {
@@ -17,18 +15,19 @@ import Animated, {
   withTiming,
 } from 'react-native-reanimated';
 import { LinearGradient } from 'expo-linear-gradient';
-import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { MeshBackground } from '@/components/animations/MeshBackground';
 import { GlassCard } from '@/components/ui/GlassCard';
 import { PressableScale } from '@/components/ui/PressableScale';
-import { Colors, Typography, Spacing, Radii } from '@/constants/theme';
+import { Typography, Spacing, Radii, Gradients } from '@/constants/theme';
+import { useColors } from '@/context/ThemeContext';
 import { useOnboardingStore } from '@/store/onboarding';
 
 export default function TasteProfile() {
+  const colors = useColors();
   const { profile, setSweetness, setBody, setAcidity, setSmokiness } = useOnboardingStore();
 
-  const headerY = useSharedValue(20);
   const headerOpacity = useSharedValue(0);
+  const headerY = useSharedValue(20);
   const cardOpacity = useSharedValue(0);
   const cardY = useSharedValue(30);
 
@@ -39,14 +38,8 @@ export default function TasteProfile() {
     cardY.value = withDelay(300, withSpring(0, { damping: 15, stiffness: 100 }));
   }, []);
 
-  const headerStyle = useAnimatedStyle(() => ({
-    opacity: headerOpacity.value,
-    transform: [{ translateY: headerY.value }],
-  }));
-  const cardStyle = useAnimatedStyle(() => ({
-    opacity: cardOpacity.value,
-    transform: [{ translateY: cardY.value }],
-  }));
+  const headerStyle = useAnimatedStyle(() => ({ opacity: headerOpacity.value, transform: [{ translateY: headerY.value }] }));
+  const cardStyle = useAnimatedStyle(() => ({ opacity: cardOpacity.value, transform: [{ translateY: cardY.value }] }));
 
   const sliders = [
     { label: 'Sweetness', emoji: '🍯', left: 'Bone Dry', right: 'Luscious', value: profile.sweetness, onChange: setSweetness },
@@ -56,113 +49,94 @@ export default function TasteProfile() {
   ];
 
   return (
-    <GestureHandlerRootView style={{ flex: 1 }}>
-      <View style={styles.container}>
-        <StatusBar barStyle="light-content" />
-        <MeshBackground />
+    <View style={[styles.container, { backgroundColor: colors.background }]}>
+      <MeshBackground />
+      <SafeAreaView style={styles.safe}>
+        <ScrollView contentContainerStyle={styles.scrollContent} showsVerticalScrollIndicator={false}>
+          <Animated.View style={[styles.header, headerStyle]}>
+            <Text style={[styles.step, { color: colors.gold }]}>Step 2 of 3</Text>
+            <Text style={[styles.title, { color: colors.text }]}>Your Palate</Text>
+            <Text style={[styles.description, { color: colors.textDim }]}>
+              Tap each dial to set your flavour preferences. Pour uses this to personalise every recommendation.
+            </Text>
+          </Animated.View>
 
-        <SafeAreaView style={styles.safe}>
-          <ScrollView
-            contentContainerStyle={styles.scrollContent}
-            showsVerticalScrollIndicator={false}
-          >
-            {/* Header */}
-            <Animated.View style={[styles.header, headerStyle]}>
-              <Text style={styles.step}>Step 2 of 3</Text>
-              <Text style={styles.title}>Your Palate</Text>
-              <Text style={styles.description}>
-                Slide each dial to capture your flavour preferences. We use this to personalise every pairing recommendation.
-              </Text>
-            </Animated.View>
-
-            {/* Sliders card */}
-            <Animated.View style={cardStyle}>
-              <GlassCard style={styles.slidersCard} intensity={55}>
-                {sliders.map((slider, i) => (
-                  <View key={slider.label}>
-                    <SliderRow {...slider} />
-                    {i < sliders.length - 1 && <View style={styles.divider} />}
-                  </View>
-                ))}
-              </GlassCard>
-            </Animated.View>
-
-            {/* Insight card */}
-            <Animated.View style={cardStyle}>
-              <GlassCard style={styles.insightCard} intensity={40}>
-                <View style={styles.insightInner}>
-                  <Text style={styles.insightIcon}>✨</Text>
-                  <Text style={styles.insightText}>
-                    Based on your profile, you might love a structured{' '}
-                    <Text style={styles.insightHighlight}>Barolo</Text> or a{' '}
-                    <Text style={styles.insightHighlight}>smoky Scotch Manhattan</Text>.
-                  </Text>
+          <Animated.View style={cardStyle}>
+            <GlassCard style={styles.slidersCard}>
+              {sliders.map((slider, i) => (
+                <View key={slider.label}>
+                  <SliderRow {...slider} colors={colors} />
+                  {i < sliders.length - 1 && <View style={[styles.divider, { backgroundColor: colors.glassBorder }]} />}
                 </View>
-              </GlassCard>
-            </Animated.View>
+              ))}
+            </GlassCard>
+          </Animated.View>
 
-            {/* CTA */}
-            <Animated.View style={[styles.ctaSection, cardStyle]}>
-              <PressableScale
-                onPress={() => router.push('/onboarding/categories')}
-                style={styles.ctaButton}
-              >
-                <LinearGradient
-                  colors={[Colors.burgundyLight, Colors.burgundy]}
-                  style={styles.ctaGradient}
-                  start={{ x: 0, y: 0 }}
-                  end={{ x: 1, y: 1 }}
-                >
-                  <Text style={styles.ctaText}>Continue</Text>
-                  <Text style={styles.ctaArrow}>→</Text>
-                </LinearGradient>
-              </PressableScale>
+          <Animated.View style={cardStyle}>
+            <GlassCard style={styles.insightCard}>
+              <View style={styles.insightInner}>
+                <Text style={styles.insightIcon}>✨</Text>
+                <Text style={[styles.insightText, { color: colors.textDim }]}>
+                  Based on your profile, you might love a structured{' '}
+                  <Text style={[styles.insightHighlight, { color: colors.gold }]}>Barolo</Text> or a{' '}
+                  <Text style={[styles.insightHighlight, { color: colors.gold }]}>smoky Scotch Manhattan</Text>.
+                </Text>
+              </View>
+            </GlassCard>
+          </Animated.View>
 
-              <PressableScale onPress={() => router.back()} style={styles.backButton}>
-                <Text style={styles.backText}>← Back</Text>
-              </PressableScale>
-            </Animated.View>
-          </ScrollView>
+          <Animated.View style={[styles.ctaSection, cardStyle]}>
+            <PressableScale onPress={() => router.push('/onboarding/categories')} style={styles.ctaButton}>
+              <LinearGradient colors={Gradients.burgundy} style={styles.ctaGradient} start={{ x: 0, y: 0 }} end={{ x: 1, y: 1 }}>
+                <Text style={styles.ctaText}>Continue</Text>
+                <Text style={[styles.ctaArrow, { color: colors.goldLight }]}>→</Text>
+              </LinearGradient>
+            </PressableScale>
+            <PressableScale onPress={() => router.back()} style={styles.backButton}>
+              <Text style={[styles.backText, { color: colors.textMuted }]}>← Back</Text>
+            </PressableScale>
+          </Animated.View>
+        </ScrollView>
 
-          {/* Progress */}
-          <View style={styles.dots}>
-            {[0, 1, 2].map((i) => (
-              <View key={i} style={[styles.dot, i === 1 && styles.dotActive]} />
-            ))}
-          </View>
-        </SafeAreaView>
-      </View>
-    </GestureHandlerRootView>
+        <View style={styles.dots}>
+          {[0, 1, 2].map((i) => (
+            <View
+              key={i}
+              style={[styles.dot, { backgroundColor: i === 1 ? colors.gold : colors.glassBorder, width: i === 1 ? 20 : 6 }]}
+            />
+          ))}
+        </View>
+      </SafeAreaView>
+    </View>
   );
 }
 
-// Simple slider using native approach (avoids gesture handler complexity)
-function SliderRow({ label, emoji, left, right, value, onChange }: {
-  label: string; emoji: string; left: string; right: string; value: number; onChange: (v: number) => void;
+function SliderRow({ label, emoji, left, right, value, onChange, colors }: {
+  label: string; emoji: string; left: string; right: string; value: number;
+  onChange: (v: number) => void; colors: ReturnType<typeof useColors>;
 }) {
   const steps = [1, 2, 3, 4, 5];
-
   return (
     <View style={sliderStyles.container}>
       <View style={sliderStyles.labelRow}>
         <Text style={sliderStyles.emoji}>{emoji}</Text>
-        <Text style={sliderStyles.label}>{label}</Text>
+        <Text style={[sliderStyles.label, { color: colors.text }]}>{label}</Text>
       </View>
       <View style={sliderStyles.stepsRow}>
-        <Text style={sliderStyles.endLabel}>{left}</Text>
+        <Text style={[sliderStyles.endLabel, { color: colors.textMuted }]}>{left}</Text>
         <View style={sliderStyles.steps}>
           {steps.map((step) => (
-            <PressableScale
-              key={step}
-              onPress={() => onChange(step)}
-              style={[sliderStyles.step, step <= value && sliderStyles.stepActive]}
-              haptic
-            >
-              <View style={[sliderStyles.stepDot, step <= value && sliderStyles.stepDotActive]} />
+            <PressableScale key={step} onPress={() => onChange(step)} style={sliderStyles.stepButton} haptic>
+              <View style={[
+                sliderStyles.stepDot,
+                step <= value
+                  ? { backgroundColor: colors.gold, borderColor: colors.gold }
+                  : { backgroundColor: colors.glass, borderColor: colors.glassBorder },
+              ]} />
             </PressableScale>
           ))}
         </View>
-        <Text style={sliderStyles.endLabel}>{right}</Text>
+        <Text style={[sliderStyles.endLabel, { color: colors.textMuted }]}>{right}</Text>
       </View>
     </View>
   );
@@ -172,121 +146,36 @@ const sliderStyles = StyleSheet.create({
   container: { paddingVertical: Spacing.md },
   labelRow: { flexDirection: 'row', alignItems: 'center', gap: 6, marginBottom: Spacing.sm },
   emoji: { fontSize: 16 },
-  label: { fontFamily: Typography.bodySemiBold, color: Colors.cream, fontSize: 14 },
+  label: { fontFamily: Typography.bodySemiBold, fontSize: 14 },
   stepsRow: { flexDirection: 'row', alignItems: 'center', gap: Spacing.sm },
-  endLabel: { fontFamily: Typography.body, color: Colors.creamDim, fontSize: 11, width: 44, textAlign: 'center' },
+  endLabel: { fontFamily: Typography.body, fontSize: 11, width: 44, textAlign: 'center' },
   steps: { flex: 1, flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' },
-  step: {
-    width: 36,
-    height: 36,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  stepActive: {},
-  stepDot: {
-    width: 14,
-    height: 14,
-    borderRadius: 7,
-    backgroundColor: 'rgba(255,255,255,0.15)',
-    borderWidth: 1,
-    borderColor: 'rgba(255,255,255,0.2)',
-  },
-  stepDotActive: {
-    backgroundColor: Colors.gold,
-    borderColor: Colors.gold,
-    shadowColor: Colors.gold,
-    shadowOffset: { width: 0, height: 0 },
-    shadowOpacity: 0.8,
-    shadowRadius: 6,
-    elevation: 4,
-  },
+  stepButton: { width: 36, height: 36, alignItems: 'center', justifyContent: 'center' },
+  stepDot: { width: 14, height: 14, borderRadius: 7, borderWidth: 1 },
 });
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: Colors.midnight },
+  container: { flex: 1 },
   safe: { flex: 1 },
-  scrollContent: {
-    paddingHorizontal: Spacing.lg,
-    paddingTop: Spacing.xl,
-    paddingBottom: Spacing.xxl,
-    gap: Spacing.lg,
-  },
+  scrollContent: { paddingHorizontal: Spacing.lg, paddingTop: Spacing.xl, paddingBottom: Spacing.xxl, gap: Spacing.lg },
   header: { gap: Spacing.xs },
-  step: {
-    fontFamily: Typography.bodyMedium,
-    fontSize: 12,
-    color: Colors.gold,
-    letterSpacing: 1.5,
-    textTransform: 'uppercase',
-  },
-  title: {
-    fontFamily: Typography.display,
-    fontSize: 42,
-    color: Colors.cream,
-    lineHeight: 48,
-  },
-  description: {
-    fontFamily: Typography.body,
-    fontSize: 15,
-    color: Colors.creamDim,
-    lineHeight: 24,
-  },
-  slidersCard: {
-    paddingHorizontal: Spacing.lg,
-    paddingVertical: Spacing.md,
-  },
-  divider: {
-    height: 1,
-    backgroundColor: 'rgba(255,255,255,0.08)',
-    marginHorizontal: -Spacing.md,
-  },
-  insightCard: {
-    padding: Spacing.md,
-  },
-  insightInner: {
-    flexDirection: 'row',
-    alignItems: 'flex-start',
-    gap: Spacing.sm,
-  },
+  step: { fontFamily: Typography.bodyMedium, fontSize: 12, letterSpacing: 1.5, textTransform: 'uppercase' },
+  title: { fontFamily: Typography.display, fontSize: 42, lineHeight: 48 },
+  description: { fontFamily: Typography.body, fontSize: 15, lineHeight: 24 },
+  slidersCard: { paddingHorizontal: Spacing.lg, paddingVertical: Spacing.md },
+  divider: { height: 1, marginHorizontal: -Spacing.md },
+  insightCard: { padding: Spacing.md },
+  insightInner: { flexDirection: 'row', alignItems: 'flex-start', gap: Spacing.sm },
   insightIcon: { fontSize: 18 },
-  insightText: {
-    flex: 1,
-    fontFamily: Typography.body,
-    fontSize: 14,
-    color: Colors.creamDim,
-    lineHeight: 22,
-  },
-  insightHighlight: {
-    fontFamily: Typography.bodySemiBold,
-    color: Colors.gold,
-  },
+  insightText: { flex: 1, fontFamily: Typography.body, fontSize: 14, lineHeight: 22 },
+  insightHighlight: { fontFamily: Typography.bodySemiBold },
   ctaSection: { gap: Spacing.sm },
   ctaButton: { borderRadius: Radii.full, overflow: 'hidden' },
-  ctaGradient: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'center',
-    paddingVertical: Spacing.md,
-    gap: Spacing.sm,
-  },
-  ctaText: { fontFamily: Typography.bodySemiBold, fontSize: 16, color: Colors.cream },
-  ctaArrow: { fontFamily: Typography.bodyBold, fontSize: 18, color: Colors.gold },
+  ctaGradient: { flexDirection: 'row', alignItems: 'center', justifyContent: 'center', paddingVertical: Spacing.md, gap: Spacing.sm },
+  ctaText: { fontFamily: Typography.bodySemiBold, fontSize: 16, color: '#F5F1E8' },
+  ctaArrow: { fontFamily: Typography.bodyBold, fontSize: 18 },
   backButton: { alignItems: 'center', paddingVertical: Spacing.sm },
-  backText: { fontFamily: Typography.body, fontSize: 14, color: Colors.creamDim },
-  dots: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    gap: 8,
-    paddingBottom: Spacing.lg,
-  },
-  dot: {
-    width: 6,
-    height: 6,
-    borderRadius: 3,
-    backgroundColor: 'rgba(255,255,255,0.25)',
-  },
-  dotActive: {
-    width: 20,
-    backgroundColor: Colors.gold,
-  },
+  backText: { fontFamily: Typography.body, fontSize: 14 },
+  dots: { flexDirection: 'row', justifyContent: 'center', gap: 8, paddingBottom: Spacing.lg },
+  dot: { height: 6, borderRadius: 3 },
 });

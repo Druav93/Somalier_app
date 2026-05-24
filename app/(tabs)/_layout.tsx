@@ -1,14 +1,16 @@
 import React from 'react';
 import { Tabs } from 'expo-router';
-import { View, StyleSheet, Text } from 'react-native';
+import { StyleSheet, View, Text } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Colors, Typography } from '@/constants/theme';
+import { Typography } from '@/constants/theme';
+import { useColors, useTheme } from '@/context/ThemeContext';
 
 function TabIcon({ icon, label, focused }: { icon: string; label: string; focused: boolean }) {
+  const colors = useColors();
   return (
     <View style={tabStyles.iconWrapper}>
       <Text style={tabStyles.icon}>{icon}</Text>
-      <Text style={[tabStyles.label, focused && tabStyles.labelActive]}>{label}</Text>
+      <Text style={[tabStyles.label, { color: focused ? colors.gold : colors.textMuted }]}>{label}</Text>
     </View>
   );
 }
@@ -16,15 +18,13 @@ function TabIcon({ icon, label, focused }: { icon: string; label: string; focuse
 const tabStyles = StyleSheet.create({
   iconWrapper: { alignItems: 'center', gap: 2 },
   icon: { fontSize: 22 },
-  label: {
-    fontFamily: Typography.bodyMedium,
-    fontSize: 10,
-    color: Colors.creamDim,
-  },
-  labelActive: { color: Colors.gold },
+  label: { fontFamily: Typography.bodyMedium, fontSize: 10 },
 });
 
 export default function TabsLayout() {
+  const colors = useColors();
+  const { isDark } = useTheme();
+
   return (
     <Tabs
       screenOptions={{
@@ -37,43 +37,21 @@ export default function TabsLayout() {
           height: 80,
         },
         tabBarBackground: () => (
-          <BlurView intensity={80} style={[StyleSheet.absoluteFill, { backgroundColor: 'rgba(10,14,39,0.6)' }]} />
+          <BlurView
+            intensity={isDark ? 80 : 70}
+            style={[StyleSheet.absoluteFill, { backgroundColor: colors.tabBar }]}
+          />
         ),
-        tabBarActiveTintColor: Colors.gold,
-        tabBarInactiveTintColor: Colors.creamDim,
+        tabBarActiveTintColor: colors.gold,
+        tabBarInactiveTintColor: colors.textMuted,
         tabBarShowLabel: false,
       }}
     >
-      <Tabs.Screen
-        name="index"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="🏠" label="Home" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="camera"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="📸" label="Scan" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="bar"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="🍾" label="My Bar" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="cocktail"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="🍸" label="Mix" focused={focused} />,
-        }}
-      />
-      <Tabs.Screen
-        name="profile"
-        options={{
-          tabBarIcon: ({ focused }) => <TabIcon icon="👤" label="Profile" focused={focused} />,
-        }}
-      />
+      <Tabs.Screen name="index" options={{ tabBarIcon: ({ focused }) => <TabIcon icon="🏠" label="Home" focused={focused} /> }} />
+      <Tabs.Screen name="camera" options={{ tabBarIcon: ({ focused }) => <TabIcon icon="📸" label="Scan" focused={focused} /> }} />
+      <Tabs.Screen name="bar" options={{ tabBarIcon: ({ focused }) => <TabIcon icon="🍾" label="My Bar" focused={focused} /> }} />
+      <Tabs.Screen name="cocktail" options={{ tabBarIcon: ({ focused }) => <TabIcon icon="🍸" label="Mix" focused={focused} /> }} />
+      <Tabs.Screen name="profile" options={{ tabBarIcon: ({ focused }) => <TabIcon icon="👤" label="Profile" focused={focused} /> }} />
     </Tabs>
   );
 }

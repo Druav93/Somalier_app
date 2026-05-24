@@ -1,7 +1,8 @@
 import React from 'react';
-import { StyleSheet, View, ViewStyle, StyleProp } from 'react-native';
+import { StyleSheet, View, StyleProp, ViewStyle } from 'react-native';
 import { BlurView } from 'expo-blur';
-import { Colors, Radii } from '@/constants/theme';
+import { Radii } from '@/constants/theme';
+import { useColors, useTheme } from '@/context/ThemeContext';
 
 interface GlassCardProps {
   children: React.ReactNode;
@@ -10,12 +11,16 @@ interface GlassCardProps {
   borderRadius?: number;
 }
 
-export function GlassCard({ children, style, intensity = 60, borderRadius = Radii.lg }: GlassCardProps) {
+export function GlassCard({ children, style, intensity, borderRadius = Radii.lg }: GlassCardProps) {
+  const colors = useColors();
+  const { isDark } = useTheme();
+  const blurIntensity = intensity ?? (isDark ? 60 : 50);
+
   return (
     <View style={[styles.wrapper, { borderRadius }, style]}>
-      <BlurView intensity={intensity} style={[StyleSheet.absoluteFill, { borderRadius }]} />
-      <View style={[styles.overlay, { borderRadius }]} />
-      <View style={[styles.border, { borderRadius }]} />
+      <BlurView intensity={blurIntensity} style={[StyleSheet.absoluteFill, { borderRadius }]} />
+      <View style={[styles.fill, { backgroundColor: colors.glass, borderRadius }]} />
+      <View style={[styles.border, { borderColor: colors.glassBorder, borderRadius }]} />
       <View style={styles.content}>{children}</View>
     </View>
   );
@@ -26,16 +31,14 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     position: 'relative',
   },
-  overlay: {
+  fill: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
-    backgroundColor: Colors.glass,
   },
   border: {
     position: 'absolute',
     top: 0, left: 0, right: 0, bottom: 0,
     borderWidth: 1,
-    borderColor: Colors.glassBorder,
   },
   content: {
     position: 'relative',

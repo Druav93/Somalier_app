@@ -1,12 +1,16 @@
 import { create } from 'zustand';
 import { Pairing, BarItem } from '@/types';
 
+type ThemeMode = 'system' | 'light' | 'dark';
+
 interface AppState {
   onboardingComplete: boolean;
+  themeMode: ThemeMode;
   pairings: Pairing[];
   favorites: string[];
   barItems: BarItem[];
   setOnboardingComplete: (v: boolean) => void;
+  setThemeMode: (m: ThemeMode) => void;
   addPairing: (p: Pairing) => void;
   toggleFavorite: (id: string) => void;
   addBarItem: (item: BarItem) => void;
@@ -15,10 +19,12 @@ interface AppState {
 
 export const useAppStore = create<AppState>((set) => ({
   onboardingComplete: false,
+  themeMode: 'system',
   pairings: [],
   favorites: [],
   barItems: [],
   setOnboardingComplete: (v) => set({ onboardingComplete: v }),
+  setThemeMode: (m) => set({ themeMode: m }),
   addPairing: (p) => set((s) => ({ pairings: [p, ...s.pairings] })),
   toggleFavorite: (id) =>
     set((s) => ({
